@@ -4,8 +4,8 @@
   >
     <div class="relative lg:w-1/2 xs:w-full xs:h-84 lg:h-full post-left">
       <img
-        :src="article.img"
-        :alt="article.alt"
+        :src="article.thumbnail[0].url"
+        :alt="article.title"
         class="absolute h-full w-full object-cover"
       />
       <div class="overlay"></div>
@@ -13,18 +13,18 @@
         <NuxtLink to="/"><Logo /></NuxtLink>
         <div class="mt-16 -mb-3 flex uppercase text-sm">
           <p class="mr-3">
-            {{ formatDate(article.updatedAt) }}
+            {{ formatDate(article.updated_at) }}
           </p>
           <span class="mr-3">•</span>
-          <p>{{ article.author.name }}</p>
+          <p>Author</p>
         </div>
         <h1 class="text-6xl font-bold">{{ article.title }}</h1>
         <span v-for="(tag, id) in article.tags" :key="id">
-          <NuxtLink :to="`/blog/tag/${tags[tag].slug}`">
+          <NuxtLink :to="`/blog/tag/${tag.slug}`">
             <span
               class="truncate uppercase tracking-wider font-medium text-ss px-2 py-1 rounded-full mr-2 mb-2 border border-light-border dark:border-dark-border transition-colors duration-300 ease-linear"
             >
-              {{ tags[tag].name }}
+              {{ tag.title }}
             </span>
           </NuxtLink>
         </span>
@@ -36,12 +36,7 @@
         >
           All articles
         </NuxtLink>
-        <a
-          href="https://nuxtjs.org/blog/creating-blog-with-nuxt-content"
-          class="mr-8 self-center text-white font-bold hover:underline"
-        >
-          Tutorial
-        </a>
+
         <AppSearchInput />
       </div>
     </div>
@@ -49,8 +44,10 @@
       class="relative xs:py-8 xs:px-8 lg:py-32 lg:px-16 lg:w-1/2 xs:w-full h-full overflow-y-scroll markdown-body post-right custom-scroll"
     >
       <h1 class="font-bold text-4xl">{{ article.title }}</h1>
-      <p>{{ article.description }}</p>
-      <p class="pb-4">Post last updated: {{ formatDate(article.updatedAt) }}</p>
+      <p v-html="$md.render(article.body)"></p>
+      <p class="pb-4">
+        Post last updated: {{ formatDate(article.created_at) }}
+      </p>
       <!-- table of contents -->
       <nav class="pb-6">
         <ul>
@@ -73,35 +70,34 @@
           </li>
         </ul>
       </nav>
-      <!-- content from markdown -->
-      <nuxt-content :document="article" />
-      <!-- content author component -->
-      <author :author="article.author" />
-      <!-- prevNext component -->
-      <PrevNext :prev="prev" :next="next" class="mt-8" />
     </div>
   </article>
 </template>
 <script>
+import { gql } from 'graphql-request'
 export default {
-  async asyncData({ $content, params }) {
-    const article = await $content('articles', params.slug).fetch()
-    const tagsList = await $content('tags')
-      .only(['name', 'slug'])
-      .where({ name: { $containsAny: article.tags } })
-      .fetch()
-    const tags = Object.assign({}, ...tagsList.map((s) => ({ [s.name]: s })))
-    const [prev, next] = await $content('articles')
-      .only(['title', 'slug'])
-      .sortBy('createdAt', 'asc')
-      .surround(params.slug)
-      .fetch()
-    return {
-      article,
-      tags,
-      prev,
-      next
-    }
+  async asyncData({ $graphql, params }) {
+    const query = gql`
+      query Article($slug: String!) {
+        articles(where: { slug: $slug }) {
+          title
+          created_at
+          updated_at
+          excerpt
+          body
+          thumbnail {
+            url
+          }
+          tags {
+            slug
+            title
+          }
+        }
+      }
+    `
+    const variables = { slug: params.slug }
+    const article = await $graphql.request(query, variables)
+    return { article: article.articles[0], variables }
   },
   methods: {
     formatDate(date) {

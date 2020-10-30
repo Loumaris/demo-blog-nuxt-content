@@ -56,7 +56,9 @@ export default {
    */
   modules: [
     // Doc: https://github.com/nuxt/content
-    '@nuxt/content'
+    '@nuxt/content',
+    'nuxt-graphql-request',
+    '@nuxtjs/markdownit'
   ],
   /*
    ** Content module configuration
@@ -74,5 +76,32 @@ export default {
    ** Build configuration
    ** See https://nuxtjs.org/api/configuration-build/
    */
-  build: {}
+  build: {},
+  graphql: {
+    /**
+     * Your GraphQL endpoint (required)
+     */
+    endpoint: '',
+
+    /**
+     * Options
+     * See: https://github.com/prisma-labs/graphql-request#passing-more-options-to-fetch
+     */
+    options: {},
+
+    /**
+     * Optional
+     * default: true (this includes cross-fetch/polyfill before creating the graphql client)
+     */
+    useFetchPolyfill: true,
+
+    /**
+     * Optional
+     * default: false (this includes graphql-tag for node_modules folder)
+     */
+    includeNodeModules: true
+  },
+  markdownit: {
+    injected: true
+  }
 }

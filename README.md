@@ -1,4 +1,6 @@
-# nuxt-content-article
+# nuxt-graphql-article
+
+based on `nuxt-content-article`
 
 The [content module](https://content.nuxtjs.org/) is a git files based headless CMS that provides powerful features when it comes to write blogs, documentation sites or just adding content to any regular website. In this post we will go through most of the benefits of this module and discover how we can create a blog with it.
 
