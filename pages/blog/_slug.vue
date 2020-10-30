@@ -92,6 +92,11 @@ export default {
             slug
             title
           }
+          seo {
+            title
+            description
+            keywords
+          }
         }
       }
     `
@@ -103,6 +108,43 @@ export default {
     formatDate(date) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' }
       return new Date(date).toLocaleDateString('en', options)
+    }
+  },
+  head() {
+    return {
+      title: this.article.seo.title,
+      meta: [
+        {
+          hid: 'title',
+          property: 'title',
+          content: this.article.seo.title
+        },
+        {
+          hid: 'description',
+          property: 'description',
+          content: this.article.seo.description
+        },
+        {
+          hid: 'keywords',
+          property: 'keywords',
+          content: this.article.seo.keywords
+        },
+        {
+          hid: 'og-title',
+          property: 'og:title',
+          content: this.article.seo.title
+        },
+        {
+          hid: 'og-description',
+          property: 'og:description',
+          content: this.article.seo.description
+        },
+        {
+          hid: 'og-keywords',
+          property: 'og:keywords',
+          content: this.article.seo.keywords
+        }
+      ]
     }
   }
 }
